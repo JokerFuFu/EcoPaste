@@ -423,6 +423,23 @@ pub async fn paste_clipboard_item(
     crate::clipboard::write_to_clipboard(&store, guard.inner().as_ref(), &item, write_plain)?;
     mark_item_reused_if_enabled(&app, &pool, &id, item.kind).await?;
 
+    // 未获授权时系统会静默丢弃模拟按键，表现为「窗口关了却没粘贴」。这里提前拦截：
+    // 内容已写入剪贴板，窗口保持可见以展示提示，并引导用户完成授权。
+    if !crate::keystroke::is_paste_permitted() {
+        log::warn!("simulated paste skipped: accessibility permission not granted");
+        crate::keystroke::prompt_paste_permission();
+
+        let lang = crate::i18n::current_language(&app);
+
+        return Err(AppError::Clipboard(
+            crate::i18n::commands::label(
+                lang,
+                crate::i18n::commands::Key::PasteAccessibilityDenied,
+            )
+            .to_string(),
+        ));
+    }
+
     if window::is_clipboard_window_pinned() {
         // 固定时窗口保持可见：macOS 上 panel 仍是 key window 会吞掉 ⌘V，需先 resign key
         // 让键焦点回到前台 App 的窗口；Windows 剪贴板窗口 focusable=false，无需处理。

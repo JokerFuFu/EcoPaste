@@ -7,5 +7,8 @@ pub fn label(key: Key) -> &'static str {
         Key::DragImageMissing => "The image file no longer exists",
         Key::DragTextEmpty => "Text content is empty",
         Key::ExternalUrlUnsupported => "Only links starting with http or https can be opened",
+        Key::PasteAccessibilityDenied => {
+            "Accessibility permission is not granted; the content has been copied to the clipboard, please paste manually"
+        }
     }
 }
