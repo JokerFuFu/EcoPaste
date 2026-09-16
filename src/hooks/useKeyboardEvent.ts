@@ -40,6 +40,9 @@ export const useKeyboardEvent = (
   const handlerRef = useLatest(handler);
 
   const handleBrowserEvent = (event: KeyboardEvent) => {
+    // IME 组词期间的按键（含确认候选的回车）归输入法处理，不触发全局快捷键。
+    if (event.isComposing) return;
+
     if (isWindowsClipboardWindow) {
       const editableTarget = findEditableElement(event.target);
       if (editableTarget) {

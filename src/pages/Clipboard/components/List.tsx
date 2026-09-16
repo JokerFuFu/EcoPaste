@@ -596,6 +596,15 @@ const List: FC = () => {
       return;
     }
 
+    // 搜索框等输入控件内的回车只结束输入并让出焦点，不粘贴；
+    // 焦点回到列表后再次回车才粘贴选中项，避免确认搜索词时误粘贴并关窗。
+    if (event.key === "Enter" && isEditableEventTarget(event.target)) {
+      event.preventDefault();
+      event.target.blur();
+
+      return;
+    }
+
     if (total === 0) return;
 
     if (event.key === "Enter") {
@@ -704,6 +713,11 @@ const List: FC = () => {
     if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
 
     event.preventDefault();
+
+    // 在输入控件内上下移动视为把焦点交给列表，之后直接回车即可粘贴。
+    if (isEditableEventTarget(event.target)) {
+      event.target.blur();
+    }
 
     const next = getNextKeyboardTarget(event);
 
@@ -1341,16 +1355,26 @@ function getSelectedIdAfterDelete(
  * 判断 Cmd/Ctrl+C 是否应交给浏览器原生复制，避免覆盖输入框或文本选区复制。
  */
 function shouldUseNativeCopy(event: KeyboardEvent) {
-  const target = event.target;
-  if (target instanceof HTMLElement) {
-    const tagName = target.tagName.toLowerCase();
-    if (target.isContentEditable) return true;
-    if (tagName === "input" || tagName === "textarea") return true;
-  }
+  if (isEditableEventTarget(event.target)) return true;
 
   const selection = window.getSelection();
 
   return Boolean(selection && !selection.isCollapsed);
+}
+
+/**
+ * 判断键盘事件是否来自输入框或富文本编辑区。
+ */
+function isEditableEventTarget(
+  target: EventTarget | null,
+): target is HTMLElement {
+  if (!(target instanceof HTMLElement)) return false;
+
+  const tagName = target.tagName.toLowerCase();
+
+  return (
+    target.isContentEditable || tagName === "input" || tagName === "textarea"
+  );
 }
 
 const computeItemKey = (index: number, item?: ClipboardItem) => {
