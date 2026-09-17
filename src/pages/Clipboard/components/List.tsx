@@ -39,7 +39,11 @@ import {
 } from "@/constants/windowOpenSelection";
 import { WINDOW_LABEL } from "@/constants/windows";
 import { useClipboardItems } from "@/hooks/useClipboardItems";
-import { useKeyboardEvent } from "@/hooks/useKeyboardEvent";
+import {
+  findEditableElement,
+  isEditableHandoffTarget,
+  useKeyboardEvent,
+} from "@/hooks/useKeyboardEvent";
 import { useTauriListen } from "@/hooks/useTauriListen";
 import { clipboardStatsState } from "@/stores/clipboardStats";
 import { clipboardViewState } from "@/stores/clipboardView";
@@ -596,13 +600,19 @@ const List: FC = () => {
       return;
     }
 
-    // 搜索框等输入控件内的回车只结束输入并让出焦点，不粘贴；
-    // 焦点回到列表后再次回车才粘贴选中项，避免确认搜索词时误粘贴并关窗。
-    if (event.key === "Enter" && isEditableEventTarget(event.target)) {
-      event.preventDefault();
-      event.target.blur();
+    // 输入控件内的回车不粘贴：搜索框等交接控件只结束输入并让出焦点，焦点回到
+    // 列表后再次回车才粘贴选中项；备注等普通输入控件保留原生回车行为。
+    if (event.key === "Enter") {
+      const editableTarget = findEditableElement(event.target);
 
-      return;
+      if (editableTarget) {
+        if (!isEditableHandoffTarget(editableTarget)) return;
+
+        event.preventDefault();
+        editableTarget.blur();
+
+        return;
+      }
     }
 
     if (total === 0) return;
@@ -712,12 +722,17 @@ const List: FC = () => {
 
     if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
 
-    event.preventDefault();
+    // 搜索框内上下移动视为把焦点交给列表，之后直接回车即可粘贴；
+    // 备注等普通输入控件保留原生光标移动。
+    const editableTarget = findEditableElement(event.target);
 
-    // 在输入控件内上下移动视为把焦点交给列表，之后直接回车即可粘贴。
-    if (isEditableEventTarget(event.target)) {
-      event.target.blur();
+    if (editableTarget) {
+      if (!isEditableHandoffTarget(editableTarget)) return;
+
+      editableTarget.blur();
     }
+
+    event.preventDefault();
 
     const next = getNextKeyboardTarget(event);
 
@@ -1355,26 +1370,11 @@ function getSelectedIdAfterDelete(
  * 判断 Cmd/Ctrl+C 是否应交给浏览器原生复制，避免覆盖输入框或文本选区复制。
  */
 function shouldUseNativeCopy(event: KeyboardEvent) {
-  if (isEditableEventTarget(event.target)) return true;
+  if (findEditableElement(event.target)) return true;
 
   const selection = window.getSelection();
 
   return Boolean(selection && !selection.isCollapsed);
-}
-
-/**
- * 判断键盘事件是否来自输入框或富文本编辑区。
- */
-function isEditableEventTarget(
-  target: EventTarget | null,
-): target is HTMLElement {
-  if (!(target instanceof HTMLElement)) return false;
-
-  const tagName = target.tagName.toLowerCase();
-
-  return (
-    target.isContentEditable || tagName === "input" || tagName === "textarea"
-  );
 }
 
 const computeItemKey = (index: number, item?: ClipboardItem) => {

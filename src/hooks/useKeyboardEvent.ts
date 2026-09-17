@@ -71,7 +71,12 @@ export const useKeyboardEvent = (
   });
 };
 
-function findEditableElement(target: EventTarget | null): HTMLElement | null {
+/**
+ * 沿事件目标向上查找输入框、多行文本框或富文本编辑区。
+ */
+export function findEditableElement(
+  target: EventTarget | null,
+): HTMLElement | null {
   if (!(target instanceof Element)) return null;
 
   let element: Element | null = target;
@@ -89,6 +94,13 @@ function findEditableElement(target: EventTarget | null): HTMLElement | null {
   return null;
 }
 
+/**
+ * 判断输入控件是否声明了把导航键交给全局键盘处理（如搜索框）。
+ */
+export function isEditableHandoffTarget(target: HTMLElement) {
+  return target.closest(EDITABLE_GLOBAL_KEYBOARD_SELECTOR) !== null;
+}
+
 function shouldUseNativeEditableKeyboard(target: EventTarget | null) {
   return findEditableElement(target) !== null;
 }
@@ -98,7 +110,7 @@ function shouldHandoffEditableKeyboard(
   event: KeyboardEvent,
 ) {
   if (event.type !== "keydown") return false;
-  if (!target.closest(EDITABLE_GLOBAL_KEYBOARD_SELECTOR)) return false;
+  if (!isEditableHandoffTarget(target)) return false;
 
   return EDITABLE_GLOBAL_HANDOFF_KEYS.has(event.key);
 }
