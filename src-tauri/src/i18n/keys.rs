@@ -26,6 +26,7 @@ pub enum CommandKey {
     DragTextEmpty,
     ExternalUrlUnsupported,
     PasteAccessibilityDenied,
+    PasteTargetUnavailable,
 }
 
 #[derive(Debug, Clone, Copy)]

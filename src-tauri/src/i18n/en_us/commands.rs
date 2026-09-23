@@ -10,5 +10,6 @@ pub fn label(key: Key) -> &'static str {
         Key::PasteAccessibilityDenied => {
             "Accessibility permission is not granted; the content has been copied to the clipboard, please paste manually"
         }
+        Key::PasteTargetUnavailable => "The destination app could not receive keyboard focus. The content is copied; select the destination and paste manually, or reopen EcoPaste from that app",
     }
 }
