@@ -13,7 +13,8 @@ $VcpkgRoot = Join-Path $CacheRoot "vcpkg-$VcpkgRevision"
 $ModelRoot = Join-Path $RepoRoot 'src-tauri/assets/ocr/tessdata'
 $LicenseRoot = Join-Path $RepoRoot 'src-tauri/assets/ocr/licenses'
 $BinaryCache = Join-Path $CacheRoot 'binary-cache'
-New-Item -ItemType Directory -Force $CacheRoot, $ModelRoot, $LicenseRoot, $BinaryCache | Out-Null
+$TripletRoot = Join-Path $CacheRoot 'triplets'
+New-Item -ItemType Directory -Force $CacheRoot, $ModelRoot, $LicenseRoot, $BinaryCache, $TripletRoot | Out-Null
 
 function Invoke-Checked([string]$Command, [string[]]$Arguments) {
     & $Command @Arguments
@@ -35,7 +36,14 @@ $env:VCPKG_ROOT = $VcpkgRoot
 $env:VCPKGRS_TRIPLET = $Triplet
 $env:VCPKG_DEFAULT_BINARY_CACHE = $BinaryCache
 Remove-Item Env:VCPKGRS_DYNAMIC -ErrorAction SilentlyContinue
-Invoke-Checked (Join-Path $VcpkgRoot 'vcpkg.exe') @('install', "tesseract:$Triplet", '--disable-metrics')
+# vcpkg-rs links installed/<triplet>/lib for both Cargo profiles. Build those
+# release libraries only; the unused native debug libraries double cold CI time.
+$BaseTriplet = Join-Path $VcpkgRoot "triplets/$Triplet.cmake"
+if (-not (Test-Path $BaseTriplet)) { $BaseTriplet = Join-Path $VcpkgRoot "triplets/community/$Triplet.cmake" }
+if (-not (Test-Path $BaseTriplet)) { throw "Unsupported pinned vcpkg triplet: $Triplet" }
+$TripletContent = (Get-Content $BaseTriplet -Raw) + "`nset(VCPKG_BUILD_TYPE release)`n"
+Set-Content (Join-Path $TripletRoot "$Triplet.cmake") $TripletContent -Encoding utf8
+Invoke-Checked (Join-Path $VcpkgRoot 'vcpkg.exe') @('install', "tesseract:$Triplet", "--overlay-triplets=$TripletRoot", '--disable-metrics')
 
 $Models = @{
     'eng' = '7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2'

@@ -42,9 +42,10 @@ jobs:
         with:
           workspaces: src-tauri
       - uses: actions/cache@v4
+        id: ocr-cache
         with:
           path: .cache/windows-ocr/binary-cache
-          key: windows-ocr-vcpkg-9e3427bc-x64-static
+          key: windows-ocr-vcpkg-9e3427bc-x64-static-release-v1
       - name: Prepare bundled OCR when present
         shell: pwsh
         run: |
@@ -52,6 +53,12 @@ jobs:
             ./scripts/prepare-windows-ocr.ps1 -Architecture x64
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
+      - name: Save prepared OCR dependencies
+        if: steps.ocr-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .cache/windows-ocr/binary-cache
+          key: windows-ocr-vcpkg-9e3427bc-x64-static-release-v1
       - run: pnpm tsc
       - run: pnpm lint
       - name: Rust formatting
