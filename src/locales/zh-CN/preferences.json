@@ -56,7 +56,7 @@
     "completed": "已完成：{{count}}",
     "disabled": "已停用",
     "failed": "失败：{{count}}",
-    "localHint": "使用 Apple Vision 在本机识别剪贴板图片，图片和识别文字均不上传。不处理文件、PDF 或 Word 文档。",
+    "localHint": "在本机识别剪贴板图片中的中英文，图片和识别文字均不上传。不处理文件、PDF 或 Word 文档。",
     "pause": "暂停",
     "paused": "处理已暂停",
     "pending": "待处理：{{count}}",
@@ -66,7 +66,7 @@
     "statusError": "无法加载识别状态，请重试后管理索引。",
     "total": "已索引 / 已排队：{{count}}",
     "unavailable": "暂不支持",
-    "unsupported": "图片文字识别目前仅支持 macOS，当前版本暂不支持 Windows。"
+    "unsupported": "本地文字识别组件未就绪，请重新安装包含 OCR 组件和模型的完整安装包。"
   },
   "schema": {
     "captureKinds": {

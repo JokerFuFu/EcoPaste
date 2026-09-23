@@ -12,7 +12,6 @@ import {
 import { updateSettings } from "@/stores/settings";
 import type { Settings } from "@/types/settings";
 import { cn } from "@/utils/cn";
-import { isWin } from "@/utils/is";
 
 interface ImageOcrPanelProps {
   highlightedSettingId: string | null;
@@ -38,7 +37,7 @@ const ImageOcrPanel: FC<ImageOcrPanelProps> = (props) => {
 
   useUnmount(cancel);
 
-  const unsupported = isWin || data?.supported === false;
+  const unsupported = data?.supported === false;
   const disabled = unsupported || !data || Boolean(error) || busy;
   const processed = (data?.completed ?? 0) + (data?.failed ?? 0);
   const percent = data?.total ? Math.round((processed / data.total) * 100) : 0;

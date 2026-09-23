@@ -115,6 +115,14 @@ pub fn notify_search(app: &AppHandle, cleared: bool) {
 }
 
 pub fn spawn(app: AppHandle) {
+    match app.path().resource_dir() {
+        Ok(root) => {
+            if let Err(err) = native::configure(&root.join("assets/ocr/tessdata")) {
+                log::warn!("local image OCR components unavailable: {err}");
+            }
+        }
+        Err(err) => log::warn!("image OCR resource directory unavailable: {err}"),
+    }
     if !native::supported() {
         return;
     }

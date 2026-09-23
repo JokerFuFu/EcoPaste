@@ -1,0 +1,74 @@
+name: Windows Validation
+
+"on":
+  workflow_dispatch:
+  push:
+    paths:
+      - "src/**"
+      - "src-tauri/**"
+      - ".cargo/config.toml"
+      - "scripts/prepare-windows-ocr.ps1"
+      - ".github/workflows/windows-validation.yml"
+      - "Cargo.lock"
+      - "pnpm-lock.yaml"
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    name: Windows x64 build and native tests
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@1.96.0
+        with:
+          components: rustfmt, clippy
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:icon
+        env:
+          PLATFORM: windows-latest
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - uses: actions/cache@v4
+        with:
+          path: .cache/windows-ocr/binary-cache
+          key: windows-ocr-vcpkg-9e3427bc-x64-static
+      - name: Prepare bundled OCR when present
+        shell: pwsh
+        run: |
+          if (Test-Path scripts/prepare-windows-ocr.ps1) {
+            ./scripts/prepare-windows-ocr.ps1 -Architecture x64
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+      - run: pnpm tsc
+      - run: pnpm lint
+      - name: Rust formatting
+        working-directory: src-tauri
+        run: cargo fmt --all --check
+      - name: Windows native compile and lint
+        working-directory: src-tauri
+        run: cargo clippy --all-targets --all-features -- -D warnings
+      - name: Windows native tests
+        working-directory: src-tauri
+        run: cargo test --all-targets --all-features
+      - name: Build Windows NSIS installer
+        run: pnpm tauri build --bundles nsis --config '{"bundle":{"createUpdaterArtifacts":false}}'
+      - name: Verify bundled models and licenses
+        shell: pwsh
+        run: |
+          $bundleRoot = Join-Path 'src-tauri/target' "$env:CARGO_BUILD_TARGET/release/bundle/nsis"
+          $installer = Get-ChildItem "$bundleRoot/*-setup.exe" | Select-Object -First 1
+          if (-not $installer) { throw 'Missing NSIS installer' }
+          $listing = & 7z l $installer.FullName
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect installer' }
+          foreach ($resource in @('eng.traineddata', 'chi_sim.traineddata', 'tessdata-fast.txt', 'tesseract.txt')) {
+            if (-not ($listing -match [regex]::Escape($resource))) { throw "Installer missing $resource" }
+          }

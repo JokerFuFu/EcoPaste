@@ -56,7 +56,7 @@
     "completed": "Completed: {{count}}",
     "disabled": "Disabled",
     "failed": "Failed: {{count}}",
-    "localHint": "Recognize clipboard images locally on this Mac using Apple Vision. Images and recognized text are not uploaded. Files, PDFs and documents are not processed.",
+    "localHint": "Recognize English and Simplified Chinese text locally in clipboard images. Images and recognized text are never uploaded. Files, PDF and Word documents are not processed.",
     "pause": "Pause",
     "paused": "Processing paused",
     "pending": "Pending: {{count}}",
@@ -66,7 +66,7 @@
     "statusError": "Could not load OCR status. Retry to manage the index.",
     "total": "Indexed / queued: {{count}}",
     "unavailable": "Unavailable",
-    "unsupported": "Image OCR is currently available on macOS only. Windows support is not available in this version."
+    "unsupported": "Local OCR components are unavailable. Reinstall a complete package with the bundled OCR models."
   },
   "schema": {
     "captureKinds": {

@@ -22,6 +22,9 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
+[target.'cfg(target_os = "windows")'.build-dependencies]
+vcpkg = "0.2"
+
 [dependencies]
 tauri = { version = "2", features = ["macos-private-api", "protocol-asset", "tray-icon", "image-ico"] }
 serde = { version = "1", features = ["derive"] }
@@ -70,6 +73,7 @@ plist = { version = "1", default-features = false }
 tauri-plugin-macos-permissions = "2"
 
 [target.'cfg(target_os = "windows")'.dependencies]
+sha2 = "0.10"
 winapi = { version = "0.3", features = [
     "winuser",
     "processthreadsapi",
