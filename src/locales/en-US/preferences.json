@@ -49,6 +49,25 @@
       "plain": "Plain backup recognized."
     }
   },
+  "imageOcr": {
+    "active": "Processing enabled",
+    "clearDescription": "Remove recognized text and queued OCR jobs, and pause processing. Original images, clipboard history, favorites, notes and groups are preserved. Resume to process new queued images, or index history again to rebuild existing images.",
+    "clearTitle": "Clear image OCR index?",
+    "completed": "Completed: {{count}}",
+    "disabled": "Disabled",
+    "failed": "Failed: {{count}}",
+    "localHint": "Recognize clipboard images locally on this Mac using Apple Vision. Images and recognized text are not uploaded. Files, PDFs and documents are not processed.",
+    "pause": "Pause",
+    "paused": "Processing paused",
+    "pending": "Pending: {{count}}",
+    "progress": "Processed {{processed}} of {{total}} (including failed jobs)",
+    "resume": "Resume",
+    "retryStatus": "Retry",
+    "statusError": "Could not load OCR status. Retry to manage the index.",
+    "total": "Indexed / queued: {{count}}",
+    "unavailable": "Unavailable",
+    "unsupported": "Image OCR is currently available on macOS only. Windows support is not available in this version."
+  },
   "schema": {
     "captureKinds": {
       "files": "Files and Folders",
@@ -107,6 +126,9 @@
       },
       "history": {
         "title": "Retention & Cleanup"
+      },
+      "imageOcr": {
+        "title": "Image OCR"
       },
       "localData": {
         "title": "Storage Locations"
@@ -395,6 +417,26 @@
         "retention": {
           "description": "Regular records older than this many days are cleaned automatically; favorites and pinned items are always kept. 0 disables time-based cleanup.",
           "title": "Retention Period"
+        }
+      },
+      "imageOcr": {
+        "clear": {
+          "controlLabel": "Clear Index",
+          "description": "Delete only OCR text and jobs, and pause processing. Original clipboard data is preserved.",
+          "title": "Clear Derived OCR Index"
+        },
+        "enabled": {
+          "description": "Enable OCR for newly captured images. Turning it off hides OCR matches without deleting the index.",
+          "title": "Search Text in Images"
+        },
+        "history": {
+          "controlLabel": "Index / Retry",
+          "description": "Queue existing images that have not been indexed and retry failed jobs. If paused, jobs wait until you resume processing.",
+          "title": "Index Historical Images"
+        },
+        "paused": {
+          "description": "Pause background processing while keeping existing OCR matches searchable. Resume after clearing the index to process new queued images.",
+          "title": "Pause Image Recognition"
         }
       },
       "localData": {
