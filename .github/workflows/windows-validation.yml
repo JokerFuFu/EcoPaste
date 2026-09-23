@@ -54,3 +54,6 @@ jobs:
       - name: Windows native tests
         working-directory: src-tauri
         run: cargo test --all-targets --all-features
+      - name: Windows clipboard image round trip
+        working-directory: src-tauri
+        run: cargo test --lib clipboard::write::tests::round_trip_image_matches_hash -- --ignored --exact --nocapture
