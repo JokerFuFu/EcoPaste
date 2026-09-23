@@ -41,7 +41,7 @@ jobs:
             esac
 
             case "$file" in
-              src-tauri/*|.cargo/*|rust-toolchain.toml|package.json|pnpm-lock.yaml|pnpm-workspace.yaml|.release-it.ts|scripts/buildIcon.ts)
+              src-tauri/*|.cargo/*|scripts/prepare-windows-ocr.ps1|rust-toolchain.toml|package.json|pnpm-lock.yaml|pnpm-workspace.yaml|.release-it.ts|scripts/buildIcon.ts)
                 backend=true
                 ;;
             esac

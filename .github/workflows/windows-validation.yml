@@ -61,6 +61,20 @@ jobs:
         run: cargo test --all-targets --all-features
       - name: Build Windows NSIS installer
         run: pnpm tauri build --bundles nsis --config '{"bundle":{"createUpdaterArtifacts":false}}'
+      - name: Verify native runtime dependencies
+        shell: pwsh
+        run: |
+          $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
+          $vsPath = (& $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath).Trim()
+          $dumpbin = Get-ChildItem "$vsPath/VC/Tools/MSVC/*/bin/Hostx64/x64/dumpbin.exe" | Sort-Object FullName -Descending | Select-Object -First 1
+          if (-not $dumpbin) { throw 'Missing dumpbin' }
+          $binary = Join-Path 'src-tauri/target' "$env:CARGO_BUILD_TARGET/release/EcoPaste.exe"
+          $imports = & $dumpbin.FullName /DEPENDENTS $binary
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect binary imports' }
+          $imports
+          if ($imports -match '(?i)(msvcp[0-9_]+|vcruntime[0-9_]+|concrt[0-9]+|libtesseract[^ ]*|lept[^ ]*|vcomp[0-9]+)\.dll') {
+            throw 'Unexpected dependency on an external C++/OCR runtime DLL'
+          }
       - name: Verify bundled models and licenses
         shell: pwsh
         run: |

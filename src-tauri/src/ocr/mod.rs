@@ -114,7 +114,8 @@ pub fn notify_search(app: &AppHandle, cleared: bool) {
     }
 }
 
-pub fn spawn(app: AppHandle) {
+/// Prepare provider resources before clipboard capture can enqueue new images.
+pub fn configure(app: &AppHandle) {
     match app.path().resource_dir() {
         Ok(root) => {
             if let Err(err) = native::configure(&root.join("assets/ocr/tessdata")) {
@@ -123,6 +124,9 @@ pub fn spawn(app: AppHandle) {
         }
         Err(err) => log::warn!("image OCR resource directory unavailable: {err}"),
     }
+}
+
+pub fn spawn(app: AppHandle) {
     if !native::supported() {
         return;
     }

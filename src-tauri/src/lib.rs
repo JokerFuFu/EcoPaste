@@ -218,6 +218,7 @@ pub fn run() {
                 })?;
                 handle_db.manage(db::DatabaseState::new(pool));
                 handle_db.manage(ocr::OcrRuntime::default());
+                ocr::configure(&handle_db);
                 clipboard::init(&handle_db)?;
                 ocr::spawn(handle_db.clone());
                 Ok::<_, anyhow::Error>(())
