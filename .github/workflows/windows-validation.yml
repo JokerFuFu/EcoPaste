@@ -12,6 +12,10 @@ name: Windows Validation
       - "Cargo.lock"
       - "pnpm-lock.yaml"
 
+concurrency:
+  group: windows-validation-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
