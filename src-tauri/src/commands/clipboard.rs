@@ -440,14 +440,9 @@ pub async fn paste_clipboard_item(
             .await;
 
     #[cfg(target_os = "windows")]
-    let paste_result: Result<()> = async {
-        if !window::is_clipboard_window_pinned() {
-            window::hide_window(&app, CLIPBOARD_WINDOW_LABEL)?;
-        }
-        tokio::time::sleep(std::time::Duration::from_millis(50)).await;
-        crate::keystroke::simulate_paste()
-    }
-    .await;
+    let paste_result =
+        window::windows::paste_to_external_application(&app, window::is_clipboard_window_pinned())
+            .await;
 
     if let Err(err) = paste_result {
         log::warn!("external paste handoff failed: {err:?}");
