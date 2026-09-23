@@ -22,6 +22,6 @@ The serial worker accepts up to 20 MiB and 40 megapixels per image and indexes u
 
 ## Windows builds
 
-From PowerShell, run `./scripts/prepare-windows-ocr.ps1 -Architecture x64` before `pnpm tauri build`. For the ARM64 target use `-Architecture arm64` and the corresponding Rust target. The script pins the vcpkg toolchain, builds static libraries, verifies both model hashes, and prepares the model/library licenses bundled with NSIS. Keep the generated environment variables in the same shell.
+From PowerShell, run `./scripts/prepare-windows-ocr.ps1 -Architecture x64` before `pnpm tauri build --target $env:CARGO_BUILD_TARGET`. For the ARM64 target use `-Architecture arm64` and the corresponding Rust target. The script pins the vcpkg toolchain, builds static libraries, verifies both model hashes, and prepares the model/library licenses bundled with NSIS. Keep the generated environment variables in the same shell.
 
 The model loader checks exact model hashes before initializing the native engine. Missing/corrupt resources disable OCR with an installation message instead of failing queued jobs indefinitely. Models are loaded through Rust into memory to support non-ASCII installation paths.
